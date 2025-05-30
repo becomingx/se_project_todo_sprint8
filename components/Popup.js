@@ -1,29 +1,42 @@
-class Popup {
-    constructor(popupSelector) {
-        this._popupSelector = popupSelector;
+export default class Popup {
+  constructor(popupSelector) {
+    this._popupElement = document.querySelector(popupSelector);
+    this._handleEscClose = this._handleEscClose.bind(this);
+  }
+
+  open() {
+    this._popupElement.classList.add("popup_visible");
+    document.addEventListener("keydown", this._handleEscClose);
+  }
+
+  close() {
+    this._popupElement.classList.remove("popup_visible");
+    document.removeEventListener("keydown", this._handleEscClose);
+  }
+
+  _handleEscClose(event) {
+    if (event.key === "Escape") {
+      this.close();
+    }
+  }
+
+  setEventListeners(openButtonSelector) {
+    const openButton = document.querySelector(openButtonSelector);
+    if (openButton) {
+      openButton.addEventListener("click", () => {
+        this.open();
+      });
     }
 
-    open() {
-        //opens popop
-        //should be called in the preexisting event handlers in index.js
-    }
-
-    close() {
-        //closes popup
-
-    }
-
-    setEventListeners() {
-        // adds a click event listener to the close icon of the 
-        //The modal window should also close when users click on the shaded area around the form
-    }
-
-    _handleEscapeClose() {
-        //stores the logic for closing the popup by pressing the Escape key
-    }
-
-    //You won’t instantiate your Popup class directly in index.js; 
-    // instead, you’ll instantiate its child class PopupWithForm
+    this._popupElement.addEventListener("click", (event) => {
+      if (
+        event.target === this._popupElement ||
+        event.target.classList.contains("popup__close")
+      ) {
+        this.close();
+      }
+    });
+  }
 }
 
 /*
