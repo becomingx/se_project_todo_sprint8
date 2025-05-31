@@ -4,6 +4,7 @@ import Todo from "../components/Todo.js";
 import FormValidator from "../components/FormValidator.js";
 import Section from "../utils/Section.js";
 import Popup from "../components/Popup.js";
+import PopupWithForm from "../components/PopupWithForm.js";
 
 const addTodoButton = document.querySelector(".button_action_add");
 const addTodoPopup = document.querySelector("#add-todo-popup");
@@ -32,6 +33,7 @@ addTodoButton.addEventListener("click", () => {
   addTodoPopupInstance.open();
 });
 
+/*
 addTodoCloseBtn.addEventListener("click", () => {
   addTodoPopupInstance.close();
 });
@@ -49,6 +51,7 @@ addTodoForm.addEventListener("submit", (evt) => {
   closeModal(addTodoPopup);
   TodoValidator.resetValidation(validationConfig, addTodoForm);
 });
+*/
 
 initialTodos.forEach(renderTodo);
 
