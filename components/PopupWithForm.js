@@ -5,8 +5,10 @@ export default class PopupWithForm extends Popup {
     // which PopupWithForm calls when the form’s submit event fires.
     constructor(popupSelector, {callback = () => {}}) {
         super(popupSelector);
+        // getting the iputs
+        // create the submit button
         this._callback = callback;
-      }
+      };
 
     _getInputValues() {
         //collects data from all the input fields and returns it as an object

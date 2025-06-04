@@ -2,9 +2,9 @@
 
 class TodoCounter {
     constructor(todos, selector) {
-        this._element = //select appropriate element
-        this._completed = //# completed todos
-        this._total = //total# of todos
+        this._element = document.querySelector(selector);//select appropriate element
+        this._completed = todos.filter(todo => todo.completed === true);//# completed todos
+        this._total = todos.length;//total# of todos
     }
 
 
