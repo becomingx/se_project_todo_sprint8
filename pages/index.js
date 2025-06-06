@@ -38,8 +38,7 @@ const todoValidator = new FormValidator(validationConfig, addTodoForm);
 const todoCallback = addTodoCloseBtn.addEventListener("click", () => {
   addTodoPopupInstance.close();
 });
-
-const todoCounter = new TodoCounter(todosList, addTodoForm);
+const todoCounter = new TodoCounter(todosList, ".counter");
 const todoPopupForm = new PopupWithForm(addTodoForm, todoCallback);
 
 const generateTodo = (data) => {
@@ -51,16 +50,17 @@ const generateTodo = (data) => {
 };
 
 const renderTodo = (data) => {
-  const todo = generateTodo(data);
-  todosList.append(todo);
+  todosList.append(data);
 };
 
 const section = new Section({
-  items: initialTodos, 
-  renderer: (item) => {const todo = generateTodo(item); todosList.append(todo);}, 
+  items: initialTodos,
+  renderer: (item) => {
+    const sectionTodo = generateTodo(item);
+    renderTodo(sectionTodo);
+  },
   containerSelector: ".todos__list"
 });
-
 
 //REFACTOR:
 //set up form submission handling via the popup class
@@ -72,48 +72,79 @@ const addTodoPopupInstance = new PopupWithForm(
     - Adding it to the section: section.addItem()
     - Closing the popup: addTodoPopupInstance.close();
     */
-  } }
+  } };
   );
 
 addTodoPopupInstance.setEventListeners();
 
 addTodoButton.addEventListener("click", () => {
-  addTodoPopupInstance.open();}) 
+  addTodoPopupInstance.open();});
 
-//todoCounterListeners are global event listeners that need to be 
-// set up once when your application starts, 
-// not every time you create a todo.
+
   const todoCounterListeners = () => {
-    // Use event delegation to handle dynamically added todos
+    /*todoCounterListeners are global event listeners that need to be 
+    set up once when your application starts, not every time you create a todo.*/
+
+    // Used event delegation to handle dynamically added todos
     document.addEventListener('change', evt => {
-        if (evt.target.matches('.todo__completed')) {
-            todoCounter.updateCompleted(evt.target.checked);
-        }
+      if (evt.target.matches('.todo__completed')) {
+        todoCounter.updateCompleted(evt.target.checked);
+      };
     });
 
     document.addEventListener('click', evt => {
-        if (evt.target.matches('.todo__delete-btn')) {
-            const todoItem = evt.target.closest('.todo');
-            if (!todoItem) return;
+      if (evt.target.matches('.todo__delete-btn')) {
+        const todoItem = evt.target.closest('.todo');
+        
+        if (!todoItem) return;
+        
+        const checkboxElement = todoItem.querySelector('.todo__completed');
+        
+        if (checkboxElement && checkboxElement.checked) {
+          todoCounter.updateCompleted(false);
+        };
 
-            const cb = todoItem.querySelector('.todo__completed');
-            if (cb && cb.checked) {
-                todoCounter.updateCompleted(false);
-            }
-
-            todoCounter.updateTotal(false);
-            todoItem.remove();
-        }
+        todoCounter.updateTotal(false);
+        todoItem.remove();
+        };
     });
-};
+  };
 
 
 
 /*
 REFACTOR:
-//Connect form submission: 
-// The popup should handle creating new todos and adding them to your section.
+Connect form submission: 
+The popup should handle creating new todos and adding them to your section.
 
+Looking at the instructions, you should delete this code block since the 
+PopupWithForm class will now handle form submission. But before you delete 
+it, let's think about what functionality needs to be preserved:
+
+Form submission handling:
+This will be handled by PopupWithForm class
+methods:
+getInputValues()
+setEventListeners()
+
+Creating new todos:
+You'll need this logic somewhere
+generateTodo();
+
+Adding todos to the section:
+You'll need this too
+section();
+
+Closing the popup:
+PopupWithForm will handle this
+super's close()
+
+Resetting validation:
+You might need this
+todoValidator.resetValidation(validationConfig, addTodoForm);
+
+This following code is the old form submission handler that you need to refactor.
+It contains your old form submission handler that needs to be integrated into your PopupWithForm class.
 addTodoForm.addEventListener("submit", (evt) => {
   evt.preventDefault();
   const name = evt.target.name.value;
@@ -127,28 +158,9 @@ addTodoForm.addEventListener("submit", (evt) => {
   closeModal(addTodoPopup);
   todoValidator.resetValidation(validationConfig, addTodoForm);
 });
-
-
-I can see the commented-out code block on lines 80-92! This is the old form submission handler that you need to refactor.
-
-Looking at the instructions, you should delete this code block since the PopupWithForm class will now handle form submission. But before you delete it, let's think about what functionality needs to be preserved:
-
-Form submission handling
-This will be handled by PopupWithForm
-
-Creating new todos
-You'll need this logic somewhere
-
-Adding todos to the section
-You'll need this too
-
-Closing the popup
-PopupWithForm will handle this
-
-Resetting validation
-You might need this
 */
 
+todoCounterListeners();
 section.renderItems();
 todoValidator.enableValidation(validationConfig, addTodoForm);
 
