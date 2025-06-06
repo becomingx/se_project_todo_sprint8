@@ -39,6 +39,9 @@ const todoCallback = addTodoCloseBtn.addEventListener("click", () => {
   addTodoPopupInstance.close();
 });
 
+const todoCounter = new TodoCounter(todosList, addTodoForm);
+const todoPopupForm = new PopupWithForm(addTodoForm, todoCallback);
+
 const generateTodo = (data) => {
   const todoElementUUID = uuidv4(); 
   const todo = new Todo(data, "#todo-template", todoElementUUID);
@@ -58,8 +61,6 @@ const section = new Section({
   containerSelector: ".todos__list"
 });
 
-const todoCounter = new TodoCounter(); 
-const todoPopupForm = new PopupWithForm(addTodoForm, todoCallback);
 
 //REFACTOR:
 //set up form submission handling via the popup class
@@ -79,6 +80,35 @@ addTodoPopupInstance.setEventListeners();
 addTodoButton.addEventListener("click", () => {
   addTodoPopupInstance.open();}) 
 
+//todoCounterListeners are global event listeners that need to be 
+// set up once when your application starts, 
+// not every time you create a todo.
+  const todoCounterListeners = () => {
+    // Use event delegation to handle dynamically added todos
+    document.addEventListener('change', evt => {
+        if (evt.target.matches('.todo__completed')) {
+            todoCounter.updateCompleted(evt.target.checked);
+        }
+    });
+
+    document.addEventListener('click', evt => {
+        if (evt.target.matches('.todo__delete-btn')) {
+            const todoItem = evt.target.closest('.todo');
+            if (!todoItem) return;
+
+            const cb = todoItem.querySelector('.todo__completed');
+            if (cb && cb.checked) {
+                todoCounter.updateCompleted(false);
+            }
+
+            todoCounter.updateTotal(false);
+            todoItem.remove();
+        }
+    });
+};
+
+
+
 /*
 REFACTOR:
 //Connect form submission: 
@@ -97,6 +127,7 @@ addTodoForm.addEventListener("submit", (evt) => {
   closeModal(addTodoPopup);
   todoValidator.resetValidation(validationConfig, addTodoForm);
 });
+
 
 I can see the commented-out code block on lines 80-92! This is the old form submission handler that you need to refactor.
 
