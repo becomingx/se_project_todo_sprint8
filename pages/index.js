@@ -3,8 +3,8 @@ import { initialTodos, validationConfig } from "../utils/constants.js";
 import Todo from "../components/Todo.js";
 import FormValidator from "../components/FormValidator.js";
 import Section from "../utils/Section.js";
-import Popup from "../components/Popup.js";
 import PopupWithForm from "../components/PopupWithForm.js";
+import TodoCounter from "../components/TodoCounter.js";
 
 /*
 The index.js file should contain only the code for:
@@ -38,6 +38,7 @@ const todoValidator = new FormValidator(validationConfig, addTodoForm);
 const todoCallback = addTodoCloseBtn.addEventListener("click", () => {
   addTodoPopupInstance.close();
 });
+
 const generateTodo = (data) => {
   const todoElementUUID = uuidv4(); 
   const todo = new Todo(data, "#todo-template", todoElementUUID);
@@ -45,26 +46,38 @@ const generateTodo = (data) => {
   
   return todoElement;
 };
+
 const renderTodo = (data) => {
   const todo = generateTodo(data);
   todosList.append(todo);
 };
+
 const section = new Section({
   items: initialTodos, 
   renderer: (item) => {const todo = generateTodo(item); todosList.append(todo);}, 
   containerSelector: ".todos__list"
 });
 
+const todoCounter = new TodoCounter(); 
 const todoPopupForm = new PopupWithForm(addTodoForm, todoCallback);
 
 //REFACTOR:
-//call setEventListeners() on addTodoPopupInstance
 //set up form submission handling via the popup class
-const addTodoPopupInstance = new PopupWithForm("#add-todo-popup");
+const addTodoPopupInstance = new PopupWithForm(
+  "#add-todo-popup", 
+  { callback: (input) => {
+    /*
+    - Creating a new todo: const todo = new Todo(data: submit form input, "#todo-template", todoElementUUID);
+    - Adding it to the section: section.addItem()
+    - Closing the popup: addTodoPopupInstance.close();
+    */
+  } }
+  );
+
+addTodoPopupInstance.setEventListeners();
 
 addTodoButton.addEventListener("click", () => {
-  addTodoPopupInstance.open();
-});
+  addTodoPopupInstance.open();}) 
 
 /*
 REFACTOR:
