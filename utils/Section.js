@@ -17,7 +17,7 @@ export default class Section {
                 container.append(element);
             } else {
                 console.error('Invalid element provided to addItem method');
-            }
+            };
         };
 
         renderItems() {
