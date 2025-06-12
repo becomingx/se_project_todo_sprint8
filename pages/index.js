@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from "https://jspm.dev/uuid";
 import { initialTodos, validationConfig } from "../utils/constants.js";
 import Todo from "../components/Todo.js";
-import FormValidator from "../components/FormValidator.js";
 import Section from "../utils/Section.js";
 import PopupWithForm from "../components/PopupWithForm.js";
 import TodoCounter from "../components/TodoCounter.js";
+import FormValidator from "../components/FormValidator.js";
 
 /*
 COMPLETE:
@@ -20,11 +20,6 @@ for the form (but not the listener that opens the form).
 */
 
 /*
-//open() method of Popup class should be called in the preexisting event handlers in index.js
-//You won’t instantiate your Popup class directly in index.js; 
-//instead, you’ll instantiate its child class PopupWithForm
-
-IN PROGRESS--
 1. COMPLETE-- 
 line 36: Create an instance of the PopupWithForm class 
 const addTodoPopupInstance = new PopupWithForm(addTodoForm, todoCallback); 
@@ -37,9 +32,9 @@ addTodoForm
 and call its setEventListeners() method. 
 completed on 131: addTodoPopupInstance.setEventListeners();
 
-TBD: You’ll need to call this instance’s open() and close() methods wherever needed in index.js.
-addTodoPopupInstance.open()
-addTodoPopupInstance.close()
+COMPLETE: You’ll need to call this instance’s open() and close() methods wherever needed in index.js.
+addTodoPopupInstance.open()--open listener
+addTodoPopupInstance.close()--todoSubmissionCallback
 */
 
 //selecting elements
@@ -51,52 +46,53 @@ const inputElement = document.querySelector(".popup__input");
 //todoSubmissionCallback should set up form submission handling via the popup child class
 const todoSubmissionCallback = () => {
   ///Creating a new todo:
-  const todoItem = generateTodo(inputElement.value);
-
-  //- Adding it to the section: 
-  //This method should be called when adding an individual card to the DOM
-  //takes a DOM element and adds it to the container
+  const inputElementValue = inputElement.value;
+  const todoItem = generateTodo(inputElementValue);
+  //Adding todoItem to the section 
   section.addItem(todoItem);
-
-  //- Closing the popup:
+  //closing the todo instance
   addTodoPopupInstance.close();
 };
 
 //class instances
 const todoValidator = new FormValidator(validationConfig, addTodoForm);
-const todoCounter = new TodoCounter(todosList, ".counter");
-const addTodoPopupInstance = new PopupWithForm(addTodoForm, todoSubmissionCallback);
+const todoCounter = new TodoCounter(initialTodos, ".counter");
+const addTodoPopupInstance = new PopupWithForm("add-todo-form", todoSubmissionCallback);
 
-//generate function, render function, section creation function
-const generateTodo = () => {
+//generate todo item function
+const generateTodo = (inputElementValue) => {
   const todoElementUUID = uuidv4(); 
-  const todo = new Todo(inputElement.value, "#todo-template", todoElementUUID);
+  const todo = new Todo(inputElementValue, "#todo-template", todoElementUUID);
   const todoElement = todo.getView();
   return todoElement;
 };
 
-//should display(render) a todo item
-const renderTodo = (item) => {
-  //Call generateTodo() to create a new todo element
-  const todoItem = generateTodo(item);
-  //Take what generateTodo() returns and append it to todosList
-  todosList.append(todoItem);
-};
+//should display(render)a todo item and append to todosList array
+const renderTodo = (inputElementValue) => 
+  {
+    const todoItem = generateTodo(inputElementValue);
+    todosList.append(todoItem);
+  };
 
+//renders and adds todo item to container
 const section = new Section({
   items: initialTodos,
-  renderer: (item) => 
-    {
-      renderTodo(item);
+  renderer: (item) => {
+    //The renderer receives data (from the initialTodos array)
+    //It should create a todo element from that data
+    //It should append that element to the container
+    const todoElement = renderTodo(item);
+    section.addItem(todoElement);
     },
-  containerSelector: ".todos__list"}
-);
+  containerSelector: ".todos__list"
+  });
 
 //Interactions Between Class Instances 
-const todoCounterListeners = () => {
-/*tglobal event listener function; needs to be set up once when your application starts, 
+
+/*global event listener function; needs to be set up once when your application starts, 
 not every time you create a todo.*/
-// Used event delegation to handle dynamically added todos
+const todoCounterListeners = () => {
+//event delegation to handle dynamically added todos
   document.addEventListener('change', evt => {
     if (evt.target.matches('.todo__completed')) {
       todoCounter.updateCompleted(evt.target.checked);
@@ -123,9 +119,10 @@ not every time you create a todo.*/
 addTodoButton.addEventListener("click", () => {
   addTodoPopupInstance.open();
 });
-addTodoPopupInstance.setEventListeners();
-todoCounterListeners();
 section.renderItems();
+todoCounterListeners();
+addTodoPopupInstance.setEventListeners();
 todoValidator.enableValidation(validationConfig, addTodoForm);
+
 
 

@@ -1,20 +1,21 @@
 //This class overrides the setEventListeners() parent method. 
-import { todoValidator } from "../components/FormValidator.js";
+import Popup from "../components/Popup.js";
+import FormValidator from "../components/FormValidator.js";
 import { validationConfig } from "../utils/constants.js";
 
 export default class PopupWithForm extends Popup {
-    constructor(popupFormElement, {callback = () => {}}) {
-        super(popupFormElement);
+    constructor(popupFormSelector, {callback = () => {}}) {
+        super(popupFormSelector);
         this._callback = callback;
       };
 
     _getInputValues() {
         //collects data from all the input fields and returns it as an object
         const inputObject = {};
-        const date = this._popupFormElement.querySelector(".popup__input_type_date");
+        const date = this._popupFormSelector.querySelector(".popup__input_type_date");
         const dateObject = new Date(date.value);
 
-        this._popupFormElement.querySelectorAll("input").forEach(element => {
+        this._popupFormSelector.querySelectorAll("input").forEach(element => {
           const name = element.name;
 
           if (element.name === date.name) {
@@ -34,12 +35,12 @@ export default class PopupWithForm extends Popup {
       //should contain the actual logic that runs when the form is submitted
         const inputDateValues = this._getInputValues();
         this._callback(inputDateValues);
-        todoValidator.resetValidation(validationConfig, this._popupFormElement);
+        FormValidator.resetValidation(validationConfig, this._popupFormSelector);
         super.close();
     };
 
     setEventListeners() {
-      this._popupFormElement.addEventListener("submit", (evt) => {
+      this._popupFormSelector.addEventListener("submit", (evt) => {
         evt.preventDefault();
         this._submitDateHandler();
       });
