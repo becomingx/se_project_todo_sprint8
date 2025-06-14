@@ -19,11 +19,13 @@ Which approach do you think you're currently using, and which one does your cons
 
 export default class Popup {
   constructor(popupFormSelector) {
+    this._popupFormSelector = popupFormSelector;
     this._popupFormElement = document.querySelector(popupFormSelector);
     this._handleEscClose = this._handleEscClose.bind(this);
   };
 
   open() {
+    console.log("Opening popup, popup element:", this._popupFormElement); 
     this._popupFormElement.classList.add("popup_visible");
     document.addEventListener("keydown", this._handleEscClose);
   };
