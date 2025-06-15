@@ -7,6 +7,7 @@ export default class PopupWithForm extends Popup {
     constructor(popupFormSelector, {callback = () => {}}) {
         super(popupFormSelector);
         this._callback = callback;
+        this._formValidator = new FormValidator(validationConfig, this._popupFormElement);
       };
 
     _getInputValues() {
@@ -35,20 +36,16 @@ export default class PopupWithForm extends Popup {
       //should contain the actual logic that runs when the form is submitted
         const inputDateValues = this._getInputValues();
         this._callback(inputDateValues);
-        FormValidator.resetValidation(validationConfig, this._popupFormElement);
         super.close();
     };
 
     setEventListeners() {
-      //error:The error "Cannot read properties of null (reading 'addEventListener')" 
-      // tells us that this._popupFormElement is null when you're trying to add the event listener to it. 
-      // This means the form element isn't being found or assigned properly. 
-      
       this._popupFormElement.addEventListener("submit", (evt) => {
         evt.preventDefault();
         this._submitDateHandler();
       });
-
+      this._formValidator.enableValidation();
+      this._formValidator.resetValidation();
       super.setEventListeners();
     };
    

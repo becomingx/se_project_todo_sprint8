@@ -6,28 +6,12 @@ import PopupWithForm from "../components/PopupWithForm.js";
 import TodoCounter from "../components/TodoCounter.js";
 import FormValidator from "../components/FormValidator.js";
 
-/*
-You’ll need to call this instance’s open() and close() methods wherever needed in index.js.
-addTodoPopupInstance.open()--open listener
-addTodoPopupInstance.close()--todoSubmissionCallback
-
-errors:
-Section.js error: "Invalid element provided to addItem method"
-
-PopupWithForm.js error: "Cannot read properties of null (reading 'addEventListener')"
-The error suggests that something is null when you're trying to add an event listener to it.
-*/
-
 //selecting elements
 const addTodoButton = document.querySelector(".button_action_add");
-console.log(addTodoButton);
 const addTodoFormElement = document.querySelector(".popup");
-const inputElement = document.querySelector(".popup__input");
-
 
 //class instances
 const todoValidator = new FormValidator(validationConfig, addTodoFormElement);
-const todoCounter = new TodoCounter(initialTodos, ".counter");
 
 //generate todo item function
 const generateTodo = (inputElementValue) => {
@@ -37,38 +21,19 @@ const generateTodo = (inputElementValue) => {
   return todoElement;
 };
 
-/*
-When you create a new Popup instance, what exactly are you passing as the popupFormElement parameter? Are you passing:
-A string (like "#my-form" or ".form-class")?
-Or an actual HTML element that you've already selected?
-The error message shows [object HTMLFormElement] 
-this tells us something specific about what type of data is being passed. What do you think this means?
-Looking at your constructor line document.querySelector(popupFormElement) 
-what does querySelector() expect to receive as its parameter?
-Think about the difference between these two approaches:
-
-// Approach A: Pass a selector string
-const popup = new Popup("#my-form");
-
-// Approach B: Pass an already-selected element
-const formElement = document.querySelector("#my-form");
-const popup = new Popup(formElement);
-Which approach do you think you're currently using, and which one does your constructor code expect?
-*/
-
-//todoSubmissionCallback should set up form submission handling via the popup child class
-const todoSubmissionCallback = () => {
+const addTodoPopupInstance = new PopupWithForm(".popup", { callback: (inputElement) => 
+  {
   ///Creating a new todo:
-  const inputElementValue = inputElement.value;
-  const todoItem = generateTodo(inputElementValue);
+  const popupFormValues = addTodoPopupInstance._getInputValues(inputElement);
+  const todoItem = generateTodo(popupFormValues);
   //Adding todoItem to the section 
   section.addItem(todoItem);
   //closing the todo instance
   addTodoPopupInstance.close();
-};
-
-const addTodoPopupInstance = new PopupWithForm(".popup", todoSubmissionCallback);
-console.log("Popup form element:", addTodoPopupInstance._popupFormElement);
+  //update todo counter
+  todoCounter.updateTotal(true);
+  }
+});
 
 //should display(render)a todo item and append to todosList array
 const renderTodo = (inputElement) => 
@@ -79,21 +44,20 @@ const renderTodo = (inputElement) =>
     return todoItem;
   };
 
-//renders and adds todo item to container
-//The Section class expects renderTodo to return a DOM element, 
-// which it then passes to the Section constructor as this.addItem(renderedItem)
 const section = new Section({
+  //The Section class expects renderTodo to return a DOM element, 
   items: initialTodos,
+  //renders and adds todo item to container
   renderer: (inputElement) => {
     return renderTodo(inputElement);
   },
   containerSelector: ".todos__list"}
 );
 
-//Interactions Between Class Instances 
+//keeps track of todo completed counter
+const todoCounter = new TodoCounter(initialTodos, ".counter");
 
-/*global event listener function; needs to be set up once when your application starts, 
-not every time you create a todo.*/
+//global event listener function
 const todoCounterListeners = () => {
 //event delegation to handle dynamically added todos
   document.addEventListener('change', evt => {
@@ -103,26 +67,27 @@ const todoCounterListeners = () => {
   });
   
   document.addEventListener('click', evt => {
-    if (evt.target.matches('.todo__delete-btn')) {
+    if (evt.target.matches('.todo__delete-btn')) 
+    {
       const todoItem = evt.target.closest('.todo');
       if (!todoItem) return;
 
       const checkboxElement = todoItem.querySelector('.todo__completed'); 
       if (checkboxElement && checkboxElement.checked) {
         todoCounter.updateCompleted(false);
-      };
 
       todoCounter.updateTotal(false);
       todoItem.remove();
+      };
     };
   });
 };
 
 //Listener for Opening the Popup
 addTodoButton.addEventListener("click", () => {
-  console.log("Button clicked!"); 
   addTodoPopupInstance.open();
 });
+//function calls
 section.renderItems();
 todoCounterListeners();
 addTodoPopupInstance.setEventListeners();
