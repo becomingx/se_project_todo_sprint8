@@ -8,9 +8,10 @@ import FormValidator from "../components/FormValidator.js";
 
 //selecting elements
 const addTodoButton = document.querySelector(".button_action_add");
-const addTodoFormElement = document.querySelector(".popup");
+const addTodoFormElement = document.querySelector(".popup__form");
 
-//class instances
+//class generation
+//validation
 const todoValidator = new FormValidator(validationConfig, addTodoFormElement);
 
 //generate todo item function
@@ -21,17 +22,16 @@ const generateTodo = (inputElementValue) => {
   return todoElement;
 };
 
-const addTodoPopupInstance = new PopupWithForm(".popup", { callback: (inputElement) => 
-  {
-  ///Creating a new todo:
-  const popupFormValues = addTodoPopupInstance._getInputValues(inputElement);
-  const todoItem = generateTodo(popupFormValues);
-  //Adding todoItem to the section 
-  section.addItem(todoItem);
-  //closing the todo instance
-  addTodoPopupInstance.close();
-  //update todo counter
-  todoCounter.updateTotal(true);
+const addTodoPopupInstance = new PopupWithForm(".popup", { 
+  callback: (popupFormValues) => { 
+    // Creates a new todo using the values passed to the callback
+    const todoItem = generateTodo(popupFormValues);
+    
+    // Add todoItem to the section 
+    section.addItem(todoItem);
+    
+    // Update todo counter
+    todoCounter.updateTotal(true);
   }
 });
 
@@ -59,39 +59,37 @@ const todoCounter = new TodoCounter(initialTodos, ".counter");
 
 //global event listener function
 const todoCounterListeners = () => {
-//event delegation to handle dynamically added todos
-  document.addEventListener('change', evt => {
-    if (evt.target.matches('.todo__completed')) {
-      todoCounter.updateCompleted(evt.target.checked);
-    };
-  });
-  
-  document.addEventListener('click', evt => {
-    if (evt.target.matches('.todo__delete-btn')) 
-    {
-      const todoItem = evt.target.closest('.todo');
-      if (!todoItem) return;
-
-      const checkboxElement = todoItem.querySelector('.todo__completed'); 
-      if (checkboxElement && checkboxElement.checked) {
-        todoCounter.updateCompleted(false);
-
-      todoCounter.updateTotal(false);
-      todoItem.remove();
+  //event delegation to handle dynamically added todos
+    document.addEventListener('change', evt => {
+      if (evt.target.matches('.todo__completed')) {
+        todoCounter.updateCompleted(evt.target.checked);
       };
-    };
-  });
-};
+    });
+  
+    document.addEventListener('click', evt => {
+      if (evt.target.matches('.todo__delete-btn')) {
+        const todoItem = evt.target.closest('.todo');
+        if (!todoItem) return;
+  
+        const checkboxElement = todoItem.querySelector('.todo__completed'); 
+        if (checkboxElement){
+          todoCounter.updateTotal(false);
+  
+          if (checkboxElement.checked) {
+          todoCounter.updateCompleted(false);
+          }
+        };
+        todoItem.remove();
+      };
+    });
+  };
 
 //Listener for Opening the Popup
 addTodoButton.addEventListener("click", () => {
   addTodoPopupInstance.open();
 });
 //function calls
+todoValidator.enableValidation();
 section.renderItems();
 todoCounterListeners();
 addTodoPopupInstance.setEventListeners();
-todoValidator.enableValidation(validationConfig, addTodoFormElement);
-
-
-
