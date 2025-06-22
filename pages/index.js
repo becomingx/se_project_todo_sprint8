@@ -8,11 +8,9 @@ import FormValidator from "../components/FormValidator.js";
 
 //selecting elements
 const addTodoButton = document.querySelector(".button_action_add");
-const addTodoFormElement = document.querySelector(".popup__form");
 
 //class generation
-//validation
-const todoValidator = new FormValidator(validationConfig, addTodoFormElement);
+
 
 //generate todo item function
 const generateTodo = (inputElementValue) => {
@@ -24,16 +22,14 @@ const generateTodo = (inputElementValue) => {
 
 const addTodoPopupInstance = new PopupWithForm(".popup", { 
   callback: (popupFormValues) => { 
-    // Creates a new todo using the values passed to the callback
     const todoItem = generateTodo(popupFormValues);
-    
-    // Add todoItem to the section 
     section.addItem(todoItem);
-    
-    // Update todo counter
     todoCounter.updateTotal(true);
   }
 });
+
+//validation
+const todoValidator = new FormValidator(validationConfig, addTodoPopupInstance.getForm());
 
 //should display(render)a todo item and append to todosList array
 const renderTodo = (inputElement) => 
