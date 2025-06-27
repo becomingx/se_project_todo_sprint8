@@ -9,20 +9,30 @@ import FormValidator from "../components/FormValidator.js";
 //selecting elements
 const addTodoButton = document.querySelector(".button_action_add");
 
-//class generation
+//keeps track of todo completed counter
+const todoCounter = new TodoCounter(initialTodos, ".counter");
 
+const onDelete = () => {
+  todoCounter.updateTotal(false);
+  todoCounter.updateCompleted(false); // decrement total count
+  const todoDeleteBtn = document.querySelector(".todo__delete-btn");
+};
+
+const onToggle = (isCompleted) => {
+  todoCounter.updateCompleted(isCompleted); // update completed count
+};
 
 //generate todo item function
-const generateTodo = (inputElementValue) => {
+const generateTodo = (inputElementValue, onDelete, onToggle) => {
   const todoElementUUID = uuidv4(); 
-  const todo = new Todo(inputElementValue, "#todo-template", todoElementUUID);
+  const todo = new Todo(inputElementValue, "#todo-template", todoElementUUID, onDelete, onToggle);
   const todoElement = todo.getView();
   return todoElement;
 };
 
 const addTodoPopupInstance = new PopupWithForm(".popup", { 
   callback: (popupFormValues) => { 
-    const todoItem = generateTodo(popupFormValues);
+    const todoItem = generateTodo(popupFormValues, onDelete, onToggle);
     section.addItem(todoItem);
     todoCounter.updateTotal(true);
   }
@@ -35,7 +45,7 @@ const todoValidator = new FormValidator(validationConfig, addTodoPopupInstance.g
 const renderTodo = (inputElement) => 
   {
     //Create the todo item
-    const todoItem = generateTodo(inputElement);
+    const todoItem = generateTodo(inputElement, onDelete, onToggle);
     //Return the todo item (so the Section class can append it)
     return todoItem;
   };
@@ -50,42 +60,12 @@ const section = new Section({
   containerSelector: ".todos__list"}
 );
 
-//keeps track of todo completed counter
-const todoCounter = new TodoCounter(initialTodos, ".counter");
-
-//global event listener function
-const todoCounterListeners = () => {
-  //event delegation to handle dynamically added todos
-    document.addEventListener('change', evt => {
-      if (evt.target.matches('.todo__completed')) {
-        todoCounter.updateCompleted(evt.target.checked);
-      };
-    });
-  
-    document.addEventListener('click', evt => {
-      if (evt.target.matches('.todo__delete-btn')) {
-        const todoItem = evt.target.closest('.todo');
-        if (!todoItem) return;
-  
-        const checkboxElement = todoItem.querySelector('.todo__completed'); 
-        if (checkboxElement){
-          todoCounter.updateTotal(false);
-  
-          if (checkboxElement.checked) {
-          todoCounter.updateCompleted(false);
-          }
-        };
-        todoItem.remove();
-      };
-    });
-  };
-
 //Listener for Opening the Popup
 addTodoButton.addEventListener("click", () => {
   addTodoPopupInstance.open();
 });
+
 //function calls
 todoValidator.enableValidation();
 section.renderItems();
-todoCounterListeners();
 addTodoPopupInstance.setEventListeners();
