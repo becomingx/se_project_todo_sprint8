@@ -15,7 +15,6 @@ const todoCounter = new TodoCounter(initialTodos, ".counter");
 const onDelete = () => {
   todoCounter.updateTotal(false);
   todoCounter.updateCompleted(false); // decrement total count
-  const todoDeleteBtn = document.querySelector(".todo__delete-btn");
 };
 
 const onToggle = (isCompleted) => {
@@ -35,6 +34,7 @@ const addTodoPopupInstance = new PopupWithForm(".popup", {
     const todoItem = generateTodo(popupFormValues, onDelete, onToggle);
     section.addItem(todoItem);
     todoCounter.updateTotal(true);
+    todoValidator.resetValidation();
   }
 });
 
